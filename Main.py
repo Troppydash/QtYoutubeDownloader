@@ -48,6 +48,15 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(layoutFileWidget)
 
+        # Combobox
+        type = QComboBox(self)
+        type.addItem("Video")
+        type.addItem("Audio")
+        type.activated[str].connect(self.setType)
+
+        layout.addWidget(type)
+
+
         # Confirm
         okButton = QPushButton("Ok")
         okButton.clicked.connect(self.startDownloading)
@@ -68,6 +77,9 @@ class MainWindow(QMainWindow):
         self.currentFile.setText(file)
         # print(self.currentFile.text())
 
+    def setType(self, s):
+        self.type = s
+
     def startDownloading(self, s):
         url = self.url.text()
         filePath = self.currentFile.text()
@@ -84,7 +96,11 @@ class MainWindow(QMainWindow):
             self.errorMsg.setHidden(True)
             self.errorMsg.setText("You shouldn't be seeing this")
 
-        cmd = 'youtube-dl -f 140 "{}" -o {}/%(title)s.%(ext)s'.format(url, filePath)
+        if self.type == 'Audio':
+            cmd = 'youtube-dl -f 140 "{}" -o {}/%(title)s.%(ext)s'.format(url, filePath)
+        else:
+            cmd = 'youtube-dl -i -f mp4 --yes-playlist "{}" -o {}/%(title)s.%(ext)s'.format(url, filePath)
+
         buttonReply = QMessageBox.question(self, "Confirmation Box", "Continue?\nCMD: " + cmd, QMessageBox.Yes | QMessageBox.No,
                                            QMessageBox.No)
         if buttonReply == QMessageBox.Yes:
